@@ -25,22 +25,54 @@ In-memory storage (no database)
 │   └── static/             # Images, CSS, JS
 └── README.md
 
-⚙️ Setup Instructions
-1️⃣ Clone the Repository
-git clone https://github.com/your-username/your-repo.git
-cd your-repo/Backend
+🖥️ Backend Setup & Running
 
-2️⃣ Create a Virtual Environment (Recommended)
-python -m venv venv
-# Activate venv
-venv\Scripts\activate      # Windows  
-source venv/bin/activate   # Mac/Linux
+Step 1: Install Standard Python
 
-3️⃣ Install Dependencies
-pip install -r requirements.txt
+Go to python.org
+ and download Python 3.13 (or 3.10 / 3.11).
 
-4️⃣ Run the Backend Server
-python app.py
+During installation, check the box “Add Python to PATH”.
+
+Verify installation by running in PowerShell or Command Prompt:
+
+python --version
+py --version
+
+
+Step 2: Clone the Repository
+
+git clone https://github.com/Tanisht21/Online_Shopping_Platform.git
+cd Online_Shopping_Platform/Backend
+
+
+Step 3: Install Dependencies
+
+Use the Python launcher to ensure the correct environment:
+
+py -3.13 -m pip install --upgrade pip
+py -3.13 -m pip install -r requirements.txt
+
+
+⚠️ Avoid using pip from MSYS2 or other non-standard Python environments to prevent errors like ModuleNotFoundError: No module named 'encodings'.
+
+Step 4: Run the Backend
+
+py -3.13 -m flask run
+
+
+Step 5: Open in Browser
+
+Access the app at:
+
+http://127.0.0.1:5500
+
+
+Step 6: Notes
+
+Ensure the Frontend folder is in the correct location relative to the Backend folder so Flask can serve index.html and static files.
+
+Flask-CORS is already included in requirements.txt for handling cross-origin requests.
 
 
 Server will run at:
