@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stitch & Style | Online Shopping Platform</title>
+    
+    <!-- we use Tailwind css as it provides ready classes -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons (used for ready icons like cart ,products, etc) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#4f46e5',
+                        'secondary': '#10b981',
+                        'accent': '#f59e0b',
+                        'card-bg': '#ffffff',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen">
+
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+    <!-- Header that stayon top and does not changes it conatins name ,cart and products buttons-->
+    <header class="py-6 mb-8 bg-card-bg rounded-xl shadow-lg">
+        <div class="flex flex-col md:flex-row justify-between items-center px-6">
+            <h1 class="text-3xl font-extrabold text-primary mb-4 md:mb-0">
+                <i data-lucide="gem" class="inline w-6 h-6 mr-2 text-accent"></i> Stitch & Style
+            </h1>
+            <nav class="flex space-x-4">
+                <button id="nav-products" onclick="navigateTo('products')" 
+                    class="nav-link py-2 px-4 rounded-lg font-medium transition duration-150 flex items-center">
+                    <i data-lucide="shopping-bag" class="w-5 h-5 mr-2"></i> Products
+                </button>
+                <button id="nav-cart" onclick="navigateTo('cart')" 
+                    class="nav-link py-2 px-4 rounded-lg font-medium transition duration-150 flex items-center relative">
+                    <i data-lucide="shopping-cart" class="w-5 h-5 mr-2"></i> Cart 
+                    <span id="cart-nav-count" class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">0</span>
+                </button>
+            </nav>
+        </div>
+        <p class="text-gray-500 mt-2 px-6 text-sm md:text-left text-center">“Where Every Stitch Speaks Style”</p>
+    </header>
+
+    <!-- notification Area -->
+    <div id="message-container" class="fixed top-4 right-4 z-50"></div>
+
+    <main class="min-h-[60vh]">
+        <!-- products are displayed here in the main class -->
+        <section id="products-view" class="view-section bg-card-bg p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="list-ordered" class="w-6 h-6 mr-2 text-secondary"></i> All Items
+            </h2>
+            <div id="loading-indicator" class="text-center p-8 text-lg text-gray-500 hidden">
+                <i data-lucide="loader" class="animate-spin w-8 h-8 mx-auto mb-2 text-primary"></i>
+                Loading Products...
+            </div>
+            <div id="product-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                
+            </div>
+        </section>
+
+        <!-- CART is viewed and checkout can be made, it conatins componenets as well-->
+        <section id="cart-view" class="view-section hidden bg-card-bg p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i data-lucide="shopping-cart" class="w-6 h-6 mr-2 text-accent"></i> Shopping Cart Summary
+            </h2>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Add To Cart products -->
+                <div class="lg:col-span-2">
+                    <div id="cart-items" class="space-y-4 min-h-[100px] border border-gray-100 p-4 rounded-lg">
+                        <p class="text-gray-500" id="cart-empty-message">Your cart is empty.</p>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-1 bg-gray-50 p-6 rounded-lg shadow-inner border border-gray-200">
+                    <h3 class="text-xl font-semibold mb-4 text-gray-700">Order Summary</h3>
+                    <div id="cart-summary" class="mt-4 pt-4 border-t border-gray-200 space-y-2">
+                        <div class="flex justify-between items-center text-lg text-gray-600">
+                            <span>Total Items:</span>
+                            <span id="summary-count" class="font-medium">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-2xl font-bold text-gray-800 pt-2">
+                            <span>Order Total:</span>
+                            <span id="cart-total">$0.00</span>
+                        </div>
+                    </div>
+                    <!--make the checkout and gives notification on screen-->
+                    <button id="checkout-button" onclick="handleCheckout()" 
+                        class="w-full mt-6 py-3 px-4 bg-secondary text-white font-semibold rounded-lg shadow-md hover:bg-emerald-600 transition duration-300 disabled:opacity-50 flex items-center justify-center" disabled>
+                        <i data-lucide="credit-card" class="w-5 h-5 mr-2"></i> Proceed to Checkout
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+    <!-- footer stays at bottom of page -->
+    <footer class="mt-12 py-6 border-t border-gray-200 bg-white">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+            &copy; 2025 Stitch & Style. All rights reserved. <br>
+            Created By Tanish Todkar (tanishtodkar21@gmail.com)
+        </div>
+    </footer>
+</div>
+
+<script>
+
+const BACKEND_URL = 'http://127.0.0.1:5000/api'; 
+const BACKEND_HOST = 'http://127.0.0.1:5000'; 
+
+/**
+ * Function to ensure image URLs point to the backend's static server (port 5000)
+ * This version is more robust, looking for 'static/' anywhere in the path string.
+ */
+function getAbsoluteImageUrl(relativePath) {
+    if (typeof relativePath !== 'string' || !relativePath) {
+        return relativePath;
+    }
+    
+    // 1. Normalize path separators and remove leading/trailing spaces
+    let path = relativePath.trim().replace(/\\/g, '/');
+
+    // 2. Find the index of "static/" which is the standard Flask static path
+    const staticIndex = path.indexOf('static/');
+    
+    if (staticIndex !== -1) {
+        // Extract the path starting from "static/"
+        const staticPart = path.substring(staticIndex);
+        
+        // Construct the full URL: http://127.0.0.1:5000/static/images/file.jpg
+        const finalUrl = `${BACKEND_HOST}/${staticPart}`;
+        console.log(`[DEBUG] Resolved Image URL (via static/): ${finalUrl}`); // Crucial for user debugging
+        return finalUrl;
+    }
+
+    // 3. If it starts with a slash, but didn't contain "static/", assume it's relative to the host root
+    if (path.startsWith('/')) {
+        const finalUrl = `${BACKEND_HOST}${path}`;
+        console.log(`[DEBUG] Resolved Image URL (Leading Slash): ${finalUrl}`);
+        return finalUrl;
+    }
+    
+    // Otherwise, return the path as is (e.g., if it's already a full URL or a placeholder)
+    console.log(`[DEBUG] Image Path Unchanged (Fallback): ${path}`);
+    return path; 
+}
+
+
+// DOM (Document like Structure ) so that js can read 
+const productListEl = document.getElementById('product-list');
+const cartItemsEl = document.getElementById('cart-items');
+const cartTotalEl = document.getElementById('cart-total');
+const summaryCountEl = document.getElementById('summary-count');
+const checkoutButton = document.getElementById('checkout-button');
+const loadingIndicator = document.getElementById('loading-indicator');
+const messageContainer = document.getElementById('message-container');
+const navLinks = {
+    products: document.getElementById('nav-products'),
+    cart: document.getElementById('nav-cart')
+};
+const views = {
+    products: document.getElementById('products-view'),
+    cart: document.getElementById('cart-view')
+};
+const cartNavCount = document.getElementById('cart-nav-count');
+
+let allProducts = [];
+let currentCart = [];
+let currentPage = 'products';
+
+
+function navigateTo(page) {
+    currentPage = page;
+    views.products.classList.toggle('hidden', page !== 'products');
+    views.cart.classList.toggle('hidden', page !== 'cart');
+
+    for (const key in navLinks) {
+        if (key === page) {
+            
+            navLinks[key].classList.replace('text-gray-700', 'text-white');
+            navLinks[key].classList.replace('hover:bg-gray-100', 'hover:bg-indigo-700');
+            navLinks[key].classList.add('bg-primary'); 
+        } else {
+            
+            navLinks[key].classList.replace('text-white', 'text-gray-700');
+            navLinks[key].classList.replace('hover:bg-indigo-700', 'hover:bg-gray-100');
+            navLinks[key].classList.remove('bg-primary');
+        }
+    }
+    lucide.createIcons();
+}
+
+function showMessage(message, isError = false) {
+    const el = document.createElement('div');
+
+    // Tailwind classes: centered, fade in, slide down
+    el.className = `
+        fixed top-8 left-1/2 transform -translate-x-1/2
+        px-6 py-4 rounded-lg shadow-xl mb-3
+        transition-all duration-500 ease-out
+        ${isError ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}
+        opacity-0 translate-y-[-20px]
+        z-50
+    `;
+
+    el.textContent = message;
+    document.body.appendChild(el);
+
+    // Trigger fade-in + slide down
+    requestAnimationFrame(() => {
+        el.classList.remove('opacity-0', 'translate-y-[-20px]');
+        el.classList.add('opacity-100', 'translate-y-0');
+    });
+
+    // Remove after 3 seconds with fade-out + slide up
+    setTimeout(() => {
+        el.classList.remove('opacity-100', 'translate-y-0');
+        el.classList.add('opacity-0', 'translate-y-[-20px]');
+        setTimeout(() => el.remove(), 500);
+    }, 3000);
+}
+
+
+function renderProducts(products) {
+    productListEl.innerHTML = '';
+    allProducts = products;
+
+    products.forEach(product => {
+        const stockText = product.stock > 0 ? `<span class="text-secondary font-medium">${product.stock} in stock</span>` : `<span class="text-red-500 font-medium">Out of Stock</span>`;
+        const isDisabled = product.stock <= 0 ? 'disabled' : '';
+        const imageUrl = getAbsoluteImageUrl(product.image); 
+        const cardHtml = `
+            <div class="p-5 border border-gray-100 rounded-xl shadow-md flex flex-col justify-between hover:shadow-lg transition duration-300">
+                <img src="${imageUrl}" alt="${product.name}" class="w-full h-48 object-cover rounded-lg mb-4" 
+                     onerror="this.onerror=null;this.src='https://placehold.co/400x300/e0e0e0/555555?text=Image+Error'">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-1">${product.name}</h3>
+                    <p class="text-lg font-semibold text-primary mb-3">Rs${product.price.toFixed(2)}</p>
+                    <p class="text-sm text-gray-500 mb-3">${product.description}</p>
+                </div>
+                <div class="mt-4">
+                    <div class="flex justify-between items-center mb-3 text-sm">
+                        ${stockText}
+                    </div>
+                    <button onclick="handleAddToCart(${product.id})" ${isDisabled}
+                        class="w-full py-2 bg-primary text-white font-medium rounded-md hover:bg-indigo-700 transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        Add to Cart
+                    </button>
+                </div>
+            </div>
+        `;
+        productListEl.insertAdjacentHTML('beforeend', cardHtml);
+    });
+    lucide.createIcons();
+}
+
+// ------------------ CART RENDER WITH + / - ------------------
+function renderCart(cart) {
+    cartItemsEl.innerHTML = '';
+    currentCart = cart;
+
+    let total = 0;
+    let totalItems = 0;
+
+    if (cart.length === 0) {
+        cartItemsEl.innerHTML = '<p class="text-gray-500 text-center py-4">Your cart is empty. Time to start shopping!</p>';
+        checkoutButton.disabled = true;
+    } else {
+        cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            totalItems += item.quantity;
+            const cartImageUrl = getAbsoluteImageUrl(item.image); 
+
+            const itemHtml = `
+                <div class="flex justify-between items-center border-b border-gray-200 py-3 last:border-b-0">
+                    <div class="flex items-center space-x-4">
+                        <img src="${cartImageUrl}" alt="${item.name}" class="w-16 h-16 object-cover rounded-lg"
+                             onerror="this.onerror=null;this.src='https://placehold.co/100x100/e0e0e0/555555?text=Img+Err'">
+                        <div>
+                            <p class="text-lg font-medium text-gray-800">${item.name}</p>
+                            <div class="flex items-center space-x-2 text-sm text-gray-500 mt-1">
+                                <span class="font-semibold text-primary">Rs${item.price.toFixed(2)}</span>
+                                <button onclick="updateCartQuantity(${item.id}, -1)" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition duration-150">-</button>
+                                <span>${item.quantity}</span>
+                                <button onclick="updateCartQuantity(${item.id}, 1)" class="px-2 py-1 bg-gray-200 rounded hover:bg-gray-300 transition duration-150">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="text-lg font-semibold text-gray-900">Rs${itemTotal.toFixed(2)}</span>
+                </div>
+            `;
+            cartItemsEl.insertAdjacentHTML('beforeend', itemHtml);
+        });
+        checkoutButton.disabled = false;
+    }
+
+    cartTotalEl.textContent = `Rs${total.toFixed(2)}`;
+    summaryCountEl.textContent = totalItems;
+    cartNavCount.textContent = totalItems;
+    cartNavCount.classList.toggle('hidden', totalItems === 0);
+}
+
+// ------------------ UPDATE QUANTITY FUNCTION ------------------
+async function updateCartQuantity(productId, delta) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/cart/update/${productId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ delta }) // +1 or -1
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to update cart.');
+        
+        // After successful update, re-fetch products to update stock/disabled state
+        await fetchProducts();
+        renderCart(data);
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message, true);
+    }
+}
+
+// ------------------ EXISTING FUNCTIONS ------------------
+async function fetchProducts() {
+    loadingIndicator.classList.remove('hidden');
+    try {
+        const response = await fetch(`${BACKEND_URL}/products`);
+        if (!response.ok) throw new Error('Failed to fetch products from backend.');
+        const data = await response.json();
+        renderProducts(data);
+    } catch (error) {
+        console.error(error);
+        showMessage("Could not connect to backend (Is Flask running on port 5000?)", true); 
+    } finally {
+        loadingIndicator.classList.add('hidden');
+    }
+}
+
+async function fetchCart() {
+    try {
+        const response = await fetch(`${BACKEND_URL}/cart`);
+        if (!response.ok) throw new Error('Failed to fetch cart.');
+        const data = await response.json();
+        renderCart(data);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+async function handleAddToCart(productId) {
+    try {
+        const response = await fetch(`${BACKEND_URL}/cart/add/${productId}`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Failed to add to cart.');
+        showMessage(`Item added to cart!`);
+        renderCart(data);
+        await fetchProducts();
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message, true);
+    }
+}
+
+async function handleCheckout() {
+    if (currentCart.length === 0) { showMessage("Cart is empty!", true); return; }
+    const originalButtonContent = checkoutButton.innerHTML;
+    checkoutButton.disabled = true;
+    checkoutButton.innerHTML = `<i data-lucide="loader" class="animate-spin w-5 h-5 mr-2"></i> Processing...`;
+    lucide.createIcons();
+
+    try {
+        const response = await fetch(`${BACKEND_URL}/checkout`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Checkout failed.');
+        showMessage(`Checkout successful! Order #${data.order_id}. Total: Rs${data.total.toFixed(2)}`);
+        renderCart([]);
+        await fetchProducts();
+        navigateTo('products');
+    } catch (error) {
+        console.error(error);
+        showMessage(error.message, true);
+    } finally {
+        checkoutButton.innerHTML = originalButtonContent;
+        checkoutButton.disabled = currentCart.length === 0;
+        lucide.createIcons();
+    }
+}
+
+window.onload = function() {
+    lucide.createIcons();
+    fetchProducts();
+    fetchCart();
+    navigateTo('products'); 
+};
+</script>
+</body>
+</html>
