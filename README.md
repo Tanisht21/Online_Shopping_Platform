@@ -75,6 +75,17 @@ Ensure the Frontend folder is in the correct location relative to the Backend fo
 Flask-CORS is already included in requirements.txt for handling cross-origin requests.
 
 
+### Project Screenshots
+
+**Homepage**  
+![Homepage](Frontend/static/images/Homepage.png)
+
+**Cart Page**  
+![Cart Page](Frontend/static/images/Cart.png)
+
+**Notification / Alerts**  
+![Notification](Frontend/static/images/Notification.png)
+
 Server will run at:
 👉 http://127.0.0.1:5500/
 
